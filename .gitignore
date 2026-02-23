@@ -1,0 +1,69 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Development notes
+dev.txt
+
+# Node modules
+node_modules/
+npm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Package manager lock files (optional - uncomment if desired)
+# package-lock.json
+# yarn.lock
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.sublime-project
+.sublime-workspace
+
+# OS specific
+Thumbs.db
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# Build outputs (if applicable)
+dist/
+build/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Testing Artifacts
+coverage/
+*_results.json
+*_results.txt
+*_output.txt
+junit.xml
+.jest/
+
+# Debug Scripts
+debug_*.js
+
+# Local Uploads (Ignore content, allow folders if .gitkeep exists)
+public/images/*
+public/videos/*
+public/documents/*
+public/others/*
+!public/**/.gitkeep
