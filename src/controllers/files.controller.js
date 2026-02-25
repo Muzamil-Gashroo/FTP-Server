@@ -1,5 +1,7 @@
 const files = require('../models/files.model');
+const UploadToken = require('../models/uploadToken.model');
 const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs').promises;
 
@@ -21,18 +23,23 @@ uploads: async (req, res) => {
     }
 
     const uploadedFiles = [];
-
+    
     for (const file of req.files) {
-
+       
       if (file.size > getMaxSize(file.mimetype)) {
         return res.status(400).json({
-          message: `File ${file.originalname} exceeds allowed size`
-        });
+         message: `File ${file.originalname} exceeds allowed size`
+       });
+       
       }
+    }
+
+    for (const file of req.files) {
 
       const fileId = uuidv4();
 
       const fileData = new files({
+       
         userID: req.userId,
         fileId,
         filename: file.filename,
@@ -40,6 +47,7 @@ uploads: async (req, res) => {
         type: file.mimetype,
         displayName: file.originalname,
         size: file.size
+      
       });
 
       await fileData.save();
@@ -51,6 +59,12 @@ uploads: async (req, res) => {
       });
     }
 
+    if (req.uploadTokenRecord) {
+    
+      await UploadToken.deleteOne({ token: req.uploadTokenRecord.token });
+    
+    };
+
     return res.json({
       message: "Files uploaded successfully",
       count: uploadedFiles.length,
@@ -60,6 +74,42 @@ uploads: async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
+},
+
+generateUploadToken: async (req, res) => {
+   
+  try {
+     
+    const existingToken = await UploadToken.findOne({
+
+       userID: req.userId,
+       used: false,
+       expiresAt: { $gt: new Date() }
+
+    });
+
+    if (existingToken) {
+      return res.status(400).json({ message: "Active upload token already exists" });
+    }
+    const token = crypto.randomBytes(32).toString("hex");
+
+    await UploadToken.create({
+
+      userID: req.userId,
+      token,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000) 
+
+    });
+
+    return res.json({
+      uploadToken: token,
+      expiresIn: 300
+    });
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
 },
 
   renameFile: async (req, res) => {
@@ -73,7 +123,7 @@ uploads: async (req, res) => {
         return res.status(400).json({ message: "New name is required" });
       }
 
-      const file = await files.findOne({ fileId });
+      const file = await files.findOne({ fileId, userID: userId });
 
       if (!file) {
         return res.status(404).json({ message: "File not found" });
@@ -107,7 +157,7 @@ uploads: async (req, res) => {
         return res.status(404).json({ message: "File not found" });
       }
 
-      if (file.userID !== req.userId) {
+      if (file.userID !== userId) {
         return res.status(403).json({ message: "Access denied" });
       }
 
