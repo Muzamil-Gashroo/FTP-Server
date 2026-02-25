@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const User = require('./user.model');
 
 const fileSchema = new mongoose.Schema({
-  // userId now corrected to userID to match the field in the User model
+  
   userID: {
     type: String,
     ref: 'User',

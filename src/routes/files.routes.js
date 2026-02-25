@@ -11,20 +11,28 @@ const router = express.Router();
 
 router.get("/list", apiKeyMiddleware, filesController.listFiles);
 
+// v1 sdk endpoints ---------------
 // apiLimiteer
 router.post("/sdk/uploads", apiKeyMiddleware, upload.array("files", 10), filesController.uploads);
 
+// apiLimiteer
+router.get("/sdk/downloads/:fileId", apiKeyMiddleware, filesController.initiateDownload);
+// -------------------------
 
+// uploads
 // apiLimiteer
 router.post("/uploads", uploadTokenMiddleware, upload.array("files", 10), filesController.uploads);
-
 
 // apiLimiteer
 router.post("/generate-upload-token", apiKeyMiddleware, filesController.generateUploadToken );
 
+//downloads
+// apiLimiteer
+router.post("/generate-signed-url/:fileId", apiKeyMiddleware, filesController.generateSignedUrl);
 
 // apiLimiteer
-router.get("/downloads/:fileId", apiKeyMiddleware, filesController.initiateDownload);
+router.get("/signed-download", filesController.signedDownload);
+
 
 // apiLimiteer
 router.delete("/delete/:fileId", apiKeyMiddleware, filesController.deleteFile);

@@ -3,6 +3,7 @@ const UploadToken = require('../models/uploadToken.model');
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 const path = require('path');
+const QRCode = require('qrcode');
 const fs = require('fs').promises;
 
 function getMaxSize(type) {
@@ -91,6 +92,7 @@ generateUploadToken: async (req, res) => {
     if (existingToken) {
       return res.status(400).json({ message: "Active upload token already exists" });
     }
+
     const token = crypto.randomBytes(32).toString("hex");
 
     await UploadToken.create({
@@ -102,8 +104,10 @@ generateUploadToken: async (req, res) => {
     });
 
     return res.json({
+
       uploadToken: token,
       expiresIn: 300
+    
     });
 
   } catch (error) {
@@ -295,8 +299,91 @@ generateUploadToken: async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-}  
+},
 
+generateSignedUrl: async (req, res) => {
+
+  try {
+    const { fileId } = req.params;
+    const userID = req.userId;
+
+    const file = await files.findOne({ fileId, userID });
+
+    if (!file) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    const expiresInSeconds = 300; // 5 minutes
+    const expires = Math.floor(Date.now() / 1000) + expiresInSeconds;
+
+    const data = `${fileId}:${expires}`;
+
+    const signature = crypto
+      .createHmac("sha256", process.env.SIGNED_URL_SECRET)
+      .update(data)
+      .digest("hex");
+
+    const url = `${process.env.BACKEND_DOMAIN}/v1/files/signed-download?fileId=${fileId}&expires=${expires}&signature=${signature}`;
+    
+    const qrCode = await QRCode.toDataURL(url);
+  
+    return res.json({
+      url,
+      qrCode,
+      expiresIn: expiresInSeconds
+    });
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+},
+
+signedDownload: async (req, res) => {
+  
+  try {
+
+    const { fileId, expires, signature } = req.query;
+
+    if (!fileId || !expires || !signature) {
+      return res.status(400).json({ message: "Missing parameters" });
+    }
+
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    if (currentTime > parseInt(expires)) {
+      return res.status(403).json({ message: "Link expired" });
+    }
+
+    const data = `${fileId}:${expires}`;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.SIGNED_URL_SECRET)
+      .update(data)
+      .digest("hex");
+
+    if (expectedSignature !== signature) {
+      return res.status(403).json({ message: "Invalid signature" });
+    }
+
+    const file = await files.findOne({ fileId });
+
+    if (!file) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    const filePath = path.join(
+      process.cwd(),
+      "public",
+      file.folder,
+      file.filename
+    );
+
+    return res.download(filePath, file.filename);
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+},
 
 
 };
