@@ -142,6 +142,7 @@ uploads: async (req, res) => {
   deleteFile: async (req, res) => {
 
     try {
+      
       const userID = req.userId;
       const { fileId } = req.params;
 
@@ -187,6 +188,64 @@ uploads: async (req, res) => {
 
   },
 
+  deleteMultipleFiles: async (req, res) => {
+  
+    try {
+
+    const userID = req.userId;
+    const { fileIds } = req.body;
+
+    if (!fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+      return res.status(400).json({ message: "No file IDs provided" });
+    }
+
+    const userFiles = await files.find({
+      fileId: { $in: fileIds },
+      userID: userID
+    });
+
+    if (userFiles.length === 0) {
+      return res.status(404).json({ message: "No matching files found" });
+    }
+
+    const failedDeletes = [];
+
+    for (const file of userFiles) {
+
+      const filePath = path.join(
+        process.cwd(),
+        "public",
+        file.folder,
+        file.filename
+      );
+
+      try {
+        await fs.unlink(filePath);
+      } catch (err) {
+        console.error("Disk deletion failed:", err.message);
+        failedDeletes.push(file.fileId);
+      }
+    }
+
+    const successfulIds = userFiles
+      .map(f => f.fileId)
+      .filter(id => !failedDeletes.includes(id));
+
+    await files.deleteMany({
+      fileId: { $in: successfulIds },
+      userID: userID
+    });
+
+    return res.json({
+      message: " delete operation completed",
+      deletedCount: successfulIds.length,
+      failed: failedDeletes
+    });
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}  
 
 
 

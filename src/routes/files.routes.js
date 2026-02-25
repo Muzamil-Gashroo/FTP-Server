@@ -21,8 +21,10 @@ router.get("/downloads/:fileId", apiKeyMiddleware, filesController.initiateDownl
 router.delete("/delete/:fileId", apiKeyMiddleware, filesController.deleteFile);
 
 // apiLimiteer
-router.patch("/rename/:fileId",  apiKeyMiddleware, filesController.renameFile);
+router.delete("/delete-all", apiKeyMiddleware, filesController.deleteMultipleFiles);
 
+// apiLimiteer
+router.patch("/rename/:fileId",  apiKeyMiddleware, filesController.renameFile);
 
 
 module.exports = router;
