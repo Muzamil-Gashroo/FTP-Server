@@ -21,7 +21,7 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
   credentials: true
 }));
-app.options('*', cors());
+app.options('/{*path}', cors());
 
 
 app.post("/v1/webhooks/stripe", express.raw({ type: "application/json" }), webhookController.handleStripeWebhook);
