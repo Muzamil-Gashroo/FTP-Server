@@ -11,8 +11,15 @@ const cors = require("cors");
 const PORT = process.env.PORT || 8080;
 const app = express();
 
-connectDB();
-
+app.use(async (req, res, next) => {
+  
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({ message: "Database connection failed" });
+  }
+});
 app.use(cors({
   origin: [
     process.env.DOMAIN,
