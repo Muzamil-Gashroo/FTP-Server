@@ -23,7 +23,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.options("*", cors());
+// app.options("*", cors());
 
 app.post("/v1/webhooks/stripe", express.raw({ type: "application/json" }), webhookController.handleStripeWebhook);
 
@@ -41,7 +41,7 @@ app.use("/v1/payments", paymentRoutes);
 app.use("/v1/files", filesRoutes);
 
 // health check
-app.use("/", (__, res) => { res.status(200).send(" Works Fine :) "); });
+// app.use("/", (__, res) => { res.status(200).send(" Works Fine :) "); });
 
 app.use((err, req, res, next) => {
   if (err.code === "LIMIT_FILE_SIZE") {
