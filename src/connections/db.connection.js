@@ -1,22 +1,22 @@
 
 const mongoose = require('mongoose');
 
+let cached = global.mongoose || { conn: null, promise: null };
+
 const connectDB = async () => {
-    try {
-        if (process.env.NODE_ENV === 'test') {
-            return;
-        }
+  if (cached.conn) return cached.conn;
 
-        if (!process.env.MONGO_URI) {
-            console.error("MONGO_URI not set in environment");
-            process.exit(1);
-        }
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log("database connected");
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      bufferCommands: false,
+    });
+  }
 
-    } catch (error) {
-        console.error("Error connecting to MongoDB:", error);
-    }
+  cached.conn = await cached.promise;
+  return cached.conn;
 };
 
-module.exports = connectDB;
+global.mongoose = cached;
+
+    module.exports = connectDB;
