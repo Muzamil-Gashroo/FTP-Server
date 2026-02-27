@@ -22,7 +22,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.options("*", cors({
+app.options("/(.*)", cors({
   origin: [process.env.DOMAIN],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
