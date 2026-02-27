@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 
 connectDB();
+app.use(cors());
 
 app.use(cors({
   origin: [
@@ -21,6 +22,8 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
   credentials: true
 }));
+
+app.options("*", cors());
 
 app.post("/v1/webhooks/stripe", express.raw({ type: "application/json" }), webhookController.handleStripeWebhook);
 
