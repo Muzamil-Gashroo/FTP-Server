@@ -6,9 +6,6 @@ const crypto = require("crypto");
 
 const nodemailer = require("nodemailer");
 
-
-const { v4: uuidv4 } = require('uuid');
-
 const authController = {
 
     login: async (req, res, next) => {
@@ -118,7 +115,7 @@ const authController = {
             });
         }
 
-        const userID = uuidv4();
+        const userID = crypto.randomUUID();
         const user = new users({ userID, name, email, password });
 
         const verifyToken = crypto.randomBytes(32).toString("hex");

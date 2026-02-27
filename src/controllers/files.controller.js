@@ -1,6 +1,5 @@
 const files = require('../models/files.model');
 const UploadToken = require('../models/uploadToken.model');
-const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 const path = require('path');
 const QRCode = require('qrcode');
@@ -37,7 +36,7 @@ uploads: async (req, res) => {
 
     for (const file of req.files) {
 
-      const fileId = uuidv4();
+      const fileId = crypto.randomUUID();
 
       const fileData = new files({
        
