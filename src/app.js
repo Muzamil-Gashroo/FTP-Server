@@ -1,4 +1,5 @@
 
+
 const authRoutes = require("./routes/auth.routes");
 const paymentRoutes = require("./routes/payment.routes");
 const webhookController = require("./controllers/stripe_controllers/stripeWebhook.controller");
@@ -39,6 +40,8 @@ app.use("/v1/payments", paymentRoutes);
 // Files (JWT - Dashboard) 
 app.use("/v1/files", filesRoutes);
 
+// health check
+app.use("/", (__, res) => { res.status(200).send(" Works Fine :) "); });
 
 app.use((err, req, res, next) => {
   if (err.code === "LIMIT_FILE_SIZE") {
