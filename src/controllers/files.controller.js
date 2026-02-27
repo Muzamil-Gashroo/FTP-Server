@@ -89,7 +89,11 @@ generateUploadToken: async (req, res) => {
     });
 
     if (existingToken) {
-      return res.status(400).json({ message: "Active upload token already exists" });
+      
+        return res.json({
+        uploadToken: existingToken.token,
+        expiresIn: Math.floor((existingToken.expiresAt - new Date()) / 1000)
+      });
     }
 
     const token = crypto.randomBytes(32).toString("hex");
