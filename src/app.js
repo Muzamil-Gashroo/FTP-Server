@@ -17,10 +17,11 @@ app.use(cors({
   origin: [
     process.env.DOMAIN,
   ],
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
   credentials: true
 }));
+app.options('*', cors());
 
 
 app.post("/v1/webhooks/stripe", express.raw({ type: "application/json" }), webhookController.handleStripeWebhook);
