@@ -6,9 +6,9 @@ const QRCode = require('qrcode');
 const fs = require('fs').promises;
 
 function getMaxSize(type) {
-  if (type.startsWith("image/")) return 10 * 1024 * 1024; // 10MB
-  if (type.startsWith("video/")) return 50 * 1024 * 1024; // 50MB
-  if (type === "application/pdf") return 20 * 1024 * 1024; // 20MB
+  if (type.startsWith("image/")) return 200 * 1024 * 1024; // 200MB
+  if (type.startsWith("video/")) return 5000 * 1024 * 1024; // 5000MB
+  if (type === "application/pdf") return 2000 * 1024 * 1024; // 2000MB
   return 10 * 1024 * 1024;
 }
 
@@ -381,7 +381,11 @@ signedDownload: async (req, res) => {
       file.filename
     );
 
-    return res.download(filePath, file.filename);
+    // return res.download(filePath, file.filename);
+
+    res.setHeader('Content-Type', file.type);
+    res.setHeader('Content-Disposition', `inline; filename="${file.filename}"`);
+    return res.sendFile(filePath);
 
   } catch (error) {
     return res.status(500).json({ message: error.message });

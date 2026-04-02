@@ -26,9 +26,20 @@ app.use(cors({
     process.env.DOMAIN,
   ],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-api-key", "x-upload-token"],
   credentials: true
 }));
+
+app.options('/{*path}', cors());
+
+// app.use(cors({
+//   origin: [
+//     process.env.DOMAIN,
+//   ],
+//   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+//   allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
+//   credentials: true
+// }));
 
 app.options('/{*path}', cors());
 
